@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import "./postForm.scss";
 const PostForm = (props) => {
+    const { refreshPosts } = props;
     const [title, setTitle] = useState("");
     const [text, setText] = useState("");
     const [userId, setUserId] = useState(1);
-
+    const [isSent, setIsSet] = useState(false);
 
 
     const savePost = () => {
@@ -24,37 +25,51 @@ const PostForm = (props) => {
             .catch((err) => console.log("error"))
     }
 
-    const handleTitle = (value) => {
-        setTitle(value);
-    }
-    const handleText = (value) => {
-        setText(value);
-    }
-
-
     const handleSubmit = (e) => {
         e.preventDefault();
         savePost();
+        setIsSet(true);
+        setTitle("");
+        setText("")
+        refreshPosts(); 
+    }
+
+    const handleTitle = (value) => {
+        setTitle(value);
+        setIsSet(false);
+    }
+    const handleText = (value) => {
+        setText(value);
+        setIsSet(false);
+
+    }
+
+
+    const handleClose = () => {
+        if (isSent) {
+            return <span style={{ color: "green" }}> Your Post is Sent !</span>
+        }
+        else { return " " }
+
     }
 
     return (
         <div className="postForm">
             <form>
                 <h1>PostForm</h1>
+                <div > {handleClose()} </div>
+
                 <label>
                     <h3>Title</h3>
-                    <input type="text" name="title" onChange={(i) => handleTitle(i.target.value)} />
-                </label> <br />
+                    <input type="text" name="title" value={title} onChange={(i) => handleTitle(i.target.value)} />
+                </label>
                 <label>
                     <h3>Text</h3>
-                    <textarea onChange={(i) => handleText(i.target.value)} />
+                    <textarea value={text} onChange={(i) => handleText(i.target.value)} />
                 </label> <br /><br />
-                <select>
-                    <option value="grapefruit">Grapefruit</option>
-                    <option defaultValue="lime">Lime</option>
 
-                </select> <br /><br />
                 <input onClick={handleSubmit} type="submit" value="Post" />
+
             </form>
         </div>
     )

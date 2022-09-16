@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Post from "../Post/Post";
+import PostForm from "../Post/PostForm";
 
 
 import "./home.scss";
@@ -9,39 +10,69 @@ const Home = (props) => {
   const [error, setError] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [postList, setPostList] = useState([]);
+  // page load olmamış yeni page-ə keçid etdikde request sonlansın state update olmasın
+  let isCancelled = false;
 
-  useEffect(() => {
+  const refreshPosts = () => {
+
+
     fetch("/posts")
       .then(res => res.json())
       .then(
         (result) => {
-          setIsLoaded(true);
-          setPostList(result);
+          if (!isCancelled) {
+            setIsLoaded(true);
+            setPostList(result);
+          }
         }, (error) => {
+          console.log(error);
           setIsLoaded(true);
           setError(error);
         }
-      )
+      );
+
+  }
+
+  useEffect(() => {
+
+    refreshPosts();
+    console.log("useEffect working");
+    return () => {
+      isCancelled = true;
+    }
 
   }, [])
 
-  if (error) { return <div> error ! ! !</div> }
-  else if (!isLoaded) { return <div> Loading . . .</div> }
+
+  if (error) { return <h1  style={{textAlign: "center"}}> error ! ! !</h1> }
+  else if (!isLoaded) { return <h1 style={{textAlign: "center"}}> Loading . . .</h1> }
+
   else {
-    return (
+    return (<div>
+      <PostForm refreshPosts={refreshPosts} />
+
       <div className='container'>
-       
-    
+
+
 
         {postList.map(post => (
-         
-         <Post userId={post.userId} userName={post.userName} title={post.title} text={post.text} key={post.id}/>
+
+          <Post
+            postId={post.id}
+            userId={post.userId}
+            userName={post.userName}
+            title={post.title} text={post.text} key={post.id
+            }
+
+          />
 
 
         )
         )}
 
       </div>
+
+    </div>
 
     );
   }
